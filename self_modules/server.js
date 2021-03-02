@@ -9,7 +9,6 @@ const app = express();
 
 app.use(express.urlencoded({extended:true}));
 app.use(bodyParser.json({limit:"1.1MB"}));
-app.use(express.static('public'));
 app.use('/', router);
 
 exports.start = function () {
