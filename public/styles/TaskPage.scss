@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC&display=swap');
+
+body{
+    background-color: #2B2C27;
+}
+
+#container{
+    display : flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    background-color: #eae0c2;
+    margin: 5vh 20vh 0vh 20vh ;
+	box-shadow: 10px -10px 0px 1px rgba(255,255,255,1);
+	height: 90vh;
+	
+}
+
+/*Titre*/
+#titreApp{
+    padding-bottom: 5vh;
+    margin-bottom: 2.5vh;
+    font-size: 8vh;
+	font-family: 'Amatic SC', cursive;
+}
+
+/*Ajout*/
+.addPart{
+    width: 70%;
+    display : flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+}
+
+#addButton {
+	justify-content: center;
+	margin: 0;
+	background-color:#2B2C27;
+	border:0;
+	color:#eae0c2;
+    height : 6vh;
+    width : 15vh;
+}
+
+#addButton:after{
+	align-self: center;
+	font-size: 1em;
+	content: "+ task";
+}
+
+@media (max-width: 600px) {
+ 	#addButton:after{
+		align-self: center;
+		font-size: 1em;
+		content: "+";
+	}
+}
+
+#addButton:hover {
+	background-color:rgb(79, 80, 76);
+	outline: none;
+}
+
+#addInput{
+    height: 6vh;
+    width: 70%;
+	border: 0.2em solid #2B2C27;
+	padding-left: 0.5em;
+	outline: none;
+}
+
+/*Liste*/
+.borderTask{
+    border: solid black thin;
+    padding : 1vh;
+    margin : 1vh;
+	display: flex;
+	justify-content:flex-start;
+	align-items:center;
+}
+
+.picture{
+    cursor: pointer;
+    width: 1.8em;
+    margin-right: 0.2em;
+    align-self: center;
+    content: url(../images/delete.png);
+}
+
+@-webkit-keyframes flip-scale-up-hor {
+    0% {
+      -webkit-transform: scale(1) rotateY(0);
+              transform: scale(1) rotateY(0);
+    }
+    50% {
+      -webkit-transform: scale(2) rotateY(-90deg);
+              transform: scale(2) rotateY(-90deg);
+    }
+    51%{
+        content: url(../images/selected_delete.png);
+    }
+    100% {
+      -webkit-transform: scale(1) rotateY(-180deg);
+              transform: scale(1) rotateY(-180deg);
+              content: url(../images/selected_delete.png);
+    }
+  }
+  @keyframes flip-scale-up-hor {
+    0% {
+      -webkit-transform: scale(1) rotateY(0);
+              transform: scale(1) rotateY(0);
+    }
+    50% {
+      -webkit-transform: scale(2) rotateY(-90deg);
+              transform: scale(2) rotateY(-90deg);
+    }
+    51%{
+        content: url(../images/selected_delete.png);
+    }
+    100% {
+      -webkit-transform: scale(1) rotateY(-180deg);
+              transform: scale(1) rotateY(-180deg);
+              content: url(../images/selected_delete.png);
+    }
+  }
+  
+  
+
+.picture:hover{
+    animation: flip-scale-up-hor 0.5s linear both;
+}
+
+.taskItem{
+    margin: 1vh;
+    font-size: 1.2em;
+    align-self: flex-start;
+    width : 20vw;
+}
+
+.containerTask{
+    display : flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: flex-start;
+    align-content: flex-start;
+	
+}
+
+#list{
+	overflow: scroll;
+}
+
+#list::-webkit-scrollbar {
+  display: none;
+}
+
+
