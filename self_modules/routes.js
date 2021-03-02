@@ -10,6 +10,7 @@ router.get('/wallets', (req, res) => {res.send("Page de portefeuilles")})
 router.post('/user/connect', userController.connectUser);
 router.post('/user/create', userController.createUser);
 router.get('/user/premium/:id', userController.upgradeUser);
+router.post('/user/forgotPwd', userController.forgotPwdUser);
 
 // Routes Wallets
 

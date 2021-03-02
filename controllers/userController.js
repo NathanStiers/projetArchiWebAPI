@@ -3,35 +3,18 @@ let User = require('../models/userModel');
 const db = require('../self_modules/db');
 const toolbox = require("../self_modules/toolbox");
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const generator = require('generate-password');
 
 const saltRounds = 12;
 
-// PRIVATE ==> Permet de récupérer les informations d'un utilisateur sur base de son mail
-__fetchUser = mail => {
-    return new Promise((resolve, reject) => {
-        let user = new User(null, null, null, null, mail, null, null);
-        if (!toolbox.checkMail(user.mail)) {
-            reject(400);
-            return;
-        }
-        db.db.query("SELECT * FROM users WHERE mail = ?;", user.mail, (error, resultSQL) => {
-            if (error) {
-                reject(500);
-                return;
-            }
-            else {
-                if (resultSQL.length === 0) {
-                    reject(403);
-                    return;
-                } else {
-                    resolve(resultSQL[0]);
-                    return;
-                }
-            }
-        });
-    });
-
-}
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'invest.ichec.ecam@gmail.com',
+        pass: 'hell0w0rld'
+    }
+});
 
 // Permet de créer un nouvel utilisateur s'il n'existe pas déjà
 // Method : POST 
@@ -73,27 +56,27 @@ exports.createUser = (req, res) => {
 exports.connectUser = async (req, res) => {
     let user = new User(null, null, null, null, req.body.mail, null, null);
     __fetchUser(user.mail).then(resultUser => {
-        bcrypt.compare(req.body.password, resultUser.password, function(err, result) {
-            if(err){
+        bcrypt.compare(req.body.password, resultUser.password, function (err, result) {
+            if (err) {
                 res.status(500).send(err);
                 return;
-            }else if(result){
+            } else if (result) {
                 delete resultUser.password
                 res.status(200).json(resultUser);
                 return;
-            }else{
+            } else {
                 res.status(401).send("Authentification incorrecte");
                 return;
             }
         });
     }).catch(err => {
-        if(err===400){
+        if (err === 400) {
             res.status(400).send("L'adresse mail indiquée ne respecte pas le format d'une adresse mail correcte");
             return;
-        }else if(err===403){
+        } else if (err === 403) {
             res.status(403).send("Désolé, il n'existe pas d'utilisateur avec l'adresse mail : " + user.mail);
             return;
-        }else{
+        } else {
             res.status(500).send(error);
             return;
         }
@@ -117,7 +100,85 @@ exports.upgradeUser = (req, res) => {
     });
 }
 
+// Permet à un utilisateur étourdi de récupérer son mot de passe sur base de son email
+// Method : POST
+// Body : email
 exports.forgotPwdUser = (req, res) => {
-    //système de récupération de mot de passe du user sur base de son id
+    let user = new User(null, null, null, null, req.body.mail, null, null);
+    __fetchUser(user.mail).then(resultUser => {
+        let newPassword = generator.generate({
+            length: 10,
+            numbers: true
+        });
+        let mailOptions = {
+            from: 'invest.ichec.ecam@gmail.com',
+            to: resultUser.mail,
+            subject: 'Confidential : Your new password',
+            text: newPassword
+        };
+        user.id = resultUser.id
+        bcrypt.hash(newPassword, saltRounds, (err, hash) => {
+            if (err) {
+                res.status(500).send(err);
+                return;
+            }
+            db.db.query("UPDATE users SET password = ? WHERE id = ?;", [hash, user.id], (error, resultSQL) => {
+                if (error) {
+                    res.status(500).send(error);
+                    return;
+                }
+                else {
+                    transporter.sendMail(mailOptions, function (error, info) {
+                        if (error) {
+                            console.log(error);
+                            res.status(500).send(error);
+                            return;
+                        } else {
+                            console.log('Email sent: ' + info.response);
+                            res.status(200).send("Email envoyé")
+                            return;
+                        }
+                    });
+                }
+            });
+        })
+    }).catch(err => {
+        if (err === 400) {
+            res.status(400).send("L'adresse mail indiquée ne respecte pas le format d'une adresse mail correcte");
+            return;
+        } else if (err === 403) {
+            res.status(403).send("Désolé, il n'existe pas d'utilisateur avec l'adresse mail : " + user.mail);
+            return;
+        } else {
+            res.status(500).send(error);
+            return;
+        }
+    })
+    return;
 }
 
+// PRIVATE ==> Permet de récupérer les informations d'un utilisateur sur base de son mail
+__fetchUser = mail => {
+    return new Promise((resolve, reject) => {
+        let user = new User(null, null, null, null, mail, null, null);
+        if (!toolbox.checkMail(user.mail)) {
+            reject(400);
+            return;
+        }
+        db.db.query("SELECT * FROM users WHERE mail = ?;", user.mail, (error, resultSQL) => {
+            if (error) {
+                reject(500);
+                return;
+            }
+            else {
+                if (resultSQL.length === 0) {
+                    reject(403);
+                    return;
+                } else {
+                    resolve(resultSQL[0]);
+                    return;
+                }
+            }
+        });
+    });
+}
