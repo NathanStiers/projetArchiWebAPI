@@ -34,6 +34,7 @@ exports.createUser = (req, res) => {
             else {
                 user.id = resultSQL.insertId;
                 user.password = null;
+                user.role = "basic";
                 res.status(201).json(user);
                 return;
             }
@@ -68,7 +69,7 @@ exports.connectUser = async (req, res) => {
             res.status(403).send("Désolé, il n'existe pas d'utilisateur avec l'adresse mail : " + user.mail);
             return;
         } else {
-            res.status(500).send(error);
+            res.status(500).send(err);
             return;
         }
     })
@@ -158,9 +159,31 @@ __fetchUser = mail => {
                     reject(403);
                     return;
                 } else {
-                    resolve(resultSQL[0]);
-                    return;
+                    __getRole(resultSQL[0].role).then(result => {
+                        resultSQL[0].role = result
+                        resolve(resultSQL[0]);
+                        return;
+                    }).catch(error => {
+                        reject(error);
+                        return;
+                    })
                 }
+            }
+        });
+    });
+}
+
+// PRIVATE ==> Permet de récupérer le label d'un rôle sur base de son id
+__getRole = id => {
+    return new Promise((resolve, reject) => {
+        db.db.query("SELECT label FROM roles WHERE id = ?;", id, (error, resultSQL) => {
+            if (error) {
+                reject(error)
+                return;
+            }
+            else {
+                resolve(resultSQL[0].label)
+                return;
             }
         });
     });
