@@ -3,18 +3,9 @@ let User = require('../models/userModel');
 const db = require('../self_modules/db');
 const toolbox = require("../self_modules/toolbox");
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
 const generator = require('generate-password');
 
 const saltRounds = 12;
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'invest.ichec.ecam@gmail.com',
-        pass: 'hell0w0rld'
-    }
-});
 
 // Permet de créer un nouvel utilisateur s'il n'existe pas déjà
 // Method : POST 
@@ -110,12 +101,6 @@ exports.forgotPwdUser = (req, res) => {
             length: 10,
             numbers: true
         });
-        let mailOptions = {
-            from: 'invest.ichec.ecam@gmail.com',
-            to: resultUser.mail,
-            subject: 'Confidential : Your new password',
-            text: newPassword
-        };
         user.id = resultUser.id
         bcrypt.hash(newPassword, saltRounds, (err, hash) => {
             if (err) {
@@ -128,16 +113,14 @@ exports.forgotPwdUser = (req, res) => {
                     return;
                 }
                 else {
-                    transporter.sendMail(mailOptions, function (error, info) {
-                        if (error) {
-                            console.log(error);
-                            res.status(500).send(error);
-                            return;
-                        } else {
-                            console.log('Email sent: ' + info.response);
-                            res.status(200).send("Email envoyé")
-                            return;
-                        }
+                    toolbox.sendMail(resultUser.mail, "Confidential : Your new password", newPassword).then(result => {
+                        console.log('Email sent: ' + result);
+                        res.status(200).send("Email envoyé")
+                        return;
+                    }).catch(error => {
+                        console.log(error);
+                        res.status(500).send(error);
+                        return;
                     });
                 }
             });
