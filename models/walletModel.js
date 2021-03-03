@@ -1,12 +1,9 @@
 class Wallet{
-    constructor(id, type, label, ticker, quantity, unit_cost_price, price_alert, asset_list){
+    constructor(id, type, label, creation_date, asset_list){
         this.id = id;
         this.type = type;
         this.label = label;
-        this.ticker = ticker;
-        this.quantity = quantity;
-        this.unit_cost_price = unit_cost_price;
-        this.price_alert = price_alert;
+        this.creation_date = creation_date;
         this.asset_list = asset_list;
     }
 }

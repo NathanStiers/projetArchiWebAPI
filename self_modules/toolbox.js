@@ -1,10 +1,12 @@
 const nodemailer = require('nodemailer');
 
+// Permet de vérifier la conformité d'un mail
 exports.checkMail = (mail) => {
     var re = /\S+@\S+\.\S+/;
     return re.test(mail);
 }
 
+// Permet d'envoyer un mail personnalisé
 exports.sendMail = (to, subject, text) => {
     let mailOptions = {
         from: process.env.NODE_MAILER_USER,
