@@ -36,7 +36,6 @@ exports.fetchAllWallets = (req, res) => {
         res.status(500).send(error);
         return;
     })
-    
 }
 
 // Permet de créer un portefeuille vide si la limite de l'utilisateur n'est pas atteinte

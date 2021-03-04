@@ -12,11 +12,6 @@ let mapping_label_id_roles = {};
 // Permet de créer un nouvel utilisateur s'il n'existe pas déjà
 // Method : POST 
 // Body : name, surname, mail, password
-/**
- * 
- * @param {*} req 
- * @param {*} res 
- */
 exports.createUser = (req, res) => {
     let user = new User(null, 1, req.body.name, req.body.surname, req.body.mail, null, []);
     bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
