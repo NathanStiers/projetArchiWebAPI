@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const db = require('../self_modules/db');
 
 // Permet de vérifier la conformité d'un mail
 exports.checkMail = (mail) => {
@@ -29,6 +30,49 @@ exports.sendMail = (to, subject, text) => {
             }
             else {
                 resolve(info);
+                return;
+            }
+        });
+    });
+}
+
+// Permet de faire un mapping des types entre label et id.
+exports.mapping_label_id_types = () => {
+    return new Promise((resolve, reject) => {
+        db.db.query("SELECT * FROM types;", (error, resultSQL) => {
+            if (error) {
+                reject(error)
+                return;
+            }
+            else {
+                let mapping = {}
+                resultSQL.forEach(t => {
+                    mapping[t.id] = t.label;
+                    mapping[t.label] = t.id;
+                });
+                resolve(mapping)
+                return;
+            }
+        });
+    });
+}
+
+
+// Permet de faire un mapping des roles entre label et id.
+exports.mapping_label_id_roles = () => {
+    return new Promise((resolve, reject) => {
+        db.db.query("SELECT * FROM roles;", (error, resultSQL) => {
+            if (error) {
+                reject(error)
+                return;
+            }
+            else {
+                let mapping = {}
+                resultSQL.forEach(r => {
+                    mapping[r.id] = r.label;
+                    mapping[r.label] = r.id;
+                });
+                resolve(mapping)
                 return;
             }
         });
