@@ -4,6 +4,7 @@ const db = require('../self_modules/db');
 const toolbox = require("../self_modules/toolbox");
 const bcrypt = require('bcrypt');
 const generator = require('generate-password');
+const jwt = require('jsonwebtoken');
 
 const saltRounds = 12;
 
@@ -64,7 +65,9 @@ exports.connectUser = (req, res) => {
                 return;
             } else if (result) {
                 delete resultUser.password
-                res.status(200).json(resultUser);
+                const token = jwt.sign({ user_id: resultUser.id }, process.env.ACCESS_TOKEN_SECRET);
+                console.log(token)
+                res.status(200).json({resultUser, token});
                 return;
             } else {
                 res.status(401).send("Authentification incorrecte");
@@ -87,8 +90,9 @@ exports.connectUser = (req, res) => {
 
 // Permet de modifier le rôle d'un utilisateur classique vers utilisateur premium sur base de son id
 // Method : GET
-// Body : id
+// Body : id (from JWT)
 exports.upgradeUser = (req, res) => {
+    console.log(req.body)
     toolbox.mapping_label_id_roles().then(result => {
         mapping_label_id_roles = result
         db.db.query("UPDATE users SET role = ? WHERE id = ?;", [mapping_label_id_roles['premium'], req.body.id], (error, resultSQL) => {
@@ -103,7 +107,6 @@ exports.upgradeUser = (req, res) => {
         });
         return;
     }).catch(error => {
-        console.log(error);
         res.status(500).send(error);
         return;
     })

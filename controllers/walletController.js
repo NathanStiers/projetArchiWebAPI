@@ -1,5 +1,4 @@
 let Wallet = require('../models/walletModel');
-let User = require('../models/userModel');
 
 const db = require('../self_modules/db');
 const toolbox = require("../self_modules/toolbox");
@@ -10,6 +9,12 @@ let mapping_label_id_roles = {};
 // Permet de récupérer les différents portefeuilles d'un utilisateur
 // Method : POST 
 // Body : user_id
+/**
+ * 
+ * Permet de récupérer les différents portefeuilles d'un utilisateur
+ * Method : POST 
+ * Body : user_id
+ */
 exports.fetchAllWallets = (req, res) => {
     __fetchUserById(req.user_id).then(result => {
         let user = result;
