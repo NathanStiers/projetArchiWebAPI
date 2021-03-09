@@ -40,7 +40,8 @@ exports.createUser = (req, res) => {
                     user.id = resultSQL.insertId;
                     user.password = null;
                     user.role = "basic";
-                    res.status(201).json(user);
+                    const token = jwt.sign({ user_id: user.id }, process.env.ACCESS_TOKEN_SECRET);
+                    res.status(201).json({user, token});
                     return;
                 }
             });
@@ -66,7 +67,6 @@ exports.connectUser = (req, res) => {
             } else if (result) {
                 delete resultUser.password
                 const token = jwt.sign({ user_id: resultUser.id }, process.env.ACCESS_TOKEN_SECRET);
-                console.log(token)
                 res.status(200).json({resultUser, token});
                 return;
             } else {
