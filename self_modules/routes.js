@@ -1,5 +1,6 @@
 let express = require('express');
 let router = express.Router();
+const toolbox = require("./toolbox");
 
 let userController = require('../controllers/userController');
 let assetController = require('../controllers/assetController');
@@ -11,5 +12,8 @@ router.post('/user/forgotPwd', userController.forgotPwdUser);
 
 // Routes Assets
 router.get('/assets/fetchAll', assetController.fetchAllAssets);
+
+// Routes Misc
+router.get('/misc/fetchAllTypes', toolbox.fetchAllTypes);
 
 module.exports = router;

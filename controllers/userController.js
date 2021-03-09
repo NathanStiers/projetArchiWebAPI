@@ -47,7 +47,6 @@ exports.createUser = (req, res) => {
             });
             return;
         }).catch(error => {
-            console.log(error);
             res.status(500).send(error);
             return;
         })
@@ -92,10 +91,9 @@ exports.connectUser = (req, res) => {
 // Method : GET
 // Body : id (from JWT)
 exports.upgradeUser = (req, res) => {
-    console.log(req.body)
     toolbox.mapping_label_id_roles().then(result => {
         mapping_label_id_roles = result
-        db.db.query("UPDATE users SET role = ? WHERE id = ?;", [mapping_label_id_roles['premium'], req.body.id], (error, resultSQL) => {
+        db.db.query("UPDATE users SET role = ? WHERE id = ?;", [mapping_label_id_roles['premium'], req.body.user_id], (error, resultSQL) => {
             if (error) {
                 res.status(500).send(error);
                 return;
@@ -118,7 +116,6 @@ exports.upgradeUser = (req, res) => {
 exports.forgotPwdUser = (req, res) => {
     let user = new User(null, null, null, null, req.body.mail, null, []);
     __fetchUserByMail(user.mail).then(resultUser => {
-        console.log("hello")
         let newPassword = generator.generate({
             length: 10,
             numbers: true
@@ -136,11 +133,9 @@ exports.forgotPwdUser = (req, res) => {
                 }
                 else {
                     toolbox.sendMail(resultUser.mail, "Confidential : Your new password", newPassword).then(result => {
-                        console.log('Email sent: ' + result);
                         res.status(200).send("Email envoyé")
                         return;
                     }).catch(error => {
-                        console.log(error);
                         res.status(500).send(error);
                         return;
                     });
@@ -185,7 +180,6 @@ __fetchUserByMail = mail => {
                         resolve(resultSQL[0]);
                         return;
                     }).catch(error => {
-                        console.log(error)
                         reject(error);
                         return;
                     })
@@ -198,11 +192,7 @@ __fetchUserByMail = mail => {
 // PACKAGE ==> Permet de récupérer les informations d'un utilisateur sur base de son id
 __fetchUserById = id => {
     return new Promise((resolve, reject) => {
-        if (!toolbox.checkMail(id)) {
-            reject(400);
-            return;
-        }
-        db.db.query("SELECT * FROM users WHERE id = ?;", user.id, (error, resultSQL) => {
+        db.db.query("SELECT * FROM users WHERE id = ?;", id, (error, resultSQL) => {
             if (error) {
                 reject(500);
                 return;
@@ -214,7 +204,7 @@ __fetchUserById = id => {
                 } else {
                     toolbox.mapping_label_id_roles().then(result => {
                         mapping_label_id_roles = result
-                        resultSQL[0].role = mapping_label_id_roles[role]
+                        resultSQL[0].role = mapping_label_id_roles[resultSQL[0].role]
                         resolve(resultSQL[0]);
                         return;
                     }).catch(error => {

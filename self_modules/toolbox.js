@@ -78,3 +78,23 @@ exports.mapping_label_id_roles = () => {
         });
     });
 }
+
+// Permet de supprimer un portefeuille sur base de son id et de son id_user
+// Method : GET 
+// Body : 
+exports.fetchAllTypes = (req, res) => {
+    db.db.query("SELECT * FROM types;", (error, resultSQL) => {
+        if (error) {
+            res.status(500).send(error)
+            return;
+        }
+        else {
+            let mapping = {}
+            resultSQL.forEach(r => {
+                mapping[r.id] = r.label;
+            });
+            res.status(200).json(mapping)
+            return;
+        }
+    });
+}

@@ -8,16 +8,18 @@ let mapping_label_id_roles = {};
 
 // Permet de récupérer les différents portefeuilles d'un utilisateur
 // Method : POST 
-// Body : user_id
+// Body : user_id (from jwt)
 /**
  * 
  * Permet de récupérer les différents portefeuilles d'un utilisateur
  * Method : POST 
- * Body : user_id
+ * Body : user_id (from jwt)
  */
 exports.fetchAllWallets = (req, res) => {
-    __fetchUserById(req.user_id).then(result => {
+    __fetchUserById(req.body.user_id).then(result => {
         let user = result;
+        user.wallet_list = []
+        user.password = null
         toolbox.mapping_label_id_types().then(result => {
             mapping_label_id_types = result;
             db.db.query("SELECT * FROM wallets WHERE user_id = ? ORDER BY creation_date ASC, id ASC LIMIT ?;", [user.id, user.role === "premium" ? 10 : 3], (error, resultSQL) => {
@@ -59,7 +61,6 @@ exports.createWallet = (req, res) => {
                     ('00' + (date.getUTCMonth() + 1)).slice(-2) + '-' +
                     ('00' + date.getUTCDate()).slice(-2)
                 let wallet = new Wallet(null, req.body.type, req.body.label, date, [], req.body.user_id);
-                console.log(wallet.type)
                 db.db.query("INSERT INTO wallets (type, user_id, label, creation_date) VALUES (?, ?, ?, ?);", [mapping_label_id_types[wallet.type], wallet.user_id, wallet.label, date], (error, resultSQL) => {
                     if (error) {
                         res.status(500).send(error);
@@ -72,7 +73,6 @@ exports.createWallet = (req, res) => {
                     }
                 });
             }).catch(error => {
-                console.log(error)
                 res.status(500).send(error);
                 return;
             });
@@ -85,7 +85,7 @@ exports.createWallet = (req, res) => {
 
 // Permet de supprimer un portefeuille sur base de son id et de son id_user
 // Method : POST 
-// Body : id, user_id
+// Body : id, user_id (from jwt)
 exports.deleteWallet = (req, res) => {
     let wallet = new Wallet(req.body.id, null, null, null, [], req.body.user_id);
     db.db.query("DELETE FROM wallets WHERE id = ? AND user_id = ?;", [wallet.id, wallet.user_id], (error, resultSQL) => {
