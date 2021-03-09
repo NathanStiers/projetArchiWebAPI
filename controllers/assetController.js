@@ -24,7 +24,7 @@ exports.fetchAllAssets = (req, res) => {
 exports.fetchWalletAllAssets = (req, res) => {
     //récupère tous les assets d'un wallet
     // Besoin du token, et du wallet id
-    db.db.query("SELECT a.ticker, a.label, aw.quantity, aw.unit_cost_price, aw.price_alert FROM assets AS a, wallets AS w, assets_wallets AS aw WHERE aw.id_wallet = ? AND aw.id_asset = a.id AND w.user_id = ?;", [req.body.wallet_id, req.body.user_id], (error, resultSQL) => {
+    db.db.query("SELECT DISTINCT a.ticker, a.label, aw.quantity, aw.unit_cost_price, aw.price_alert FROM assets AS a, wallets AS w, assets_wallets AS aw WHERE aw.id_wallet = ? AND aw.id_asset = a.id AND w.user_id = ?;", [req.params.id_wallet, req.body.user_id], (error, resultSQL) => {
         if (error) {
             res.status(500).send(error)
             return;
