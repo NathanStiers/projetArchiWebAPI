@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `ProjetArchiWeb`.`Assets_wallets` (
   `id_wallet` INT NOT NULL,
   `id_asset` INT NOT NULL,
   `quantity` DOUBLE NOT NULL,
-  `unit_cost_price` DOUBLE NOT NULL,
+  `invested_amount` DOUBLE NOT NULL,
   `price_alert` DOUBLE NULL,
   PRIMARY KEY (`id`),
   INDEX `id_wallet_idx` (`id_wallet` ASC) VISIBLE,
@@ -202,9 +202,9 @@ INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (30, 2, '
 -- -----------------------------------------------------
 -- INSERTS `ProjetArchiWeb`.`Assets_wallets`
 -- -----------------------------------------------------
-INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, unit_cost_price) VALUES (1, 1, 21, 0.25, 36500);
-INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, unit_cost_price) VALUES (2, 1, 25, 250, 0.82);
-INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, unit_cost_price) VALUES (3, 2, 4, 15, 45.22);
-INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, unit_cost_price) VALUES (4, 2, 10, 5, 65.01);
-INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, unit_cost_price) VALUES (5, 2, 16, 30, 95.35);
-INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, unit_cost_price) VALUES (6, 3, 9, 105, 25.56);
+INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, invested_amount) VALUES (1, 1, 21, 0.25, 9125);
+INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, invested_amount) VALUES (2, 1, 25, 250, 205);
+INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, invested_amount) VALUES (3, 2, 4, 15, 678.3);
+INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, invested_amount) VALUES (4, 2, 10, 5, 325.05);
+INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, invested_amount) VALUES (5, 2, 16, 30, 2860.5);
+INSERT INTO `ProjetArchiWeb`.`Assets_wallets` (id, id_wallet, id_asset, quantity, invested_amount) VALUES (6, 3, 9, 105, 2683.8);
