@@ -1,18 +1,19 @@
 let express = require('express');
 let router = express.Router();
 
-let userController = require('../controllers/userController');
-let walletController = require('../controllers/walletController');
-let assetController = require('../controllers/assetController');
+let userController = require('../../controllers/userController');
+let walletController = require('../../controllers/walletController');
+let assetController = require('../../controllers/assetController');
 
-const isBelongingWallet = require('./isBelongingWallet')
+const isBelongingWallet = require('../middlewares/isBelongingWallet')
+const maxWalletReached = require('../middlewares/maxWalletReached')
 
 // Routes Users
 router.post('/user/premium', userController.upgradeUser);
 
 // Routes Wallets
 router.post('/wallets/fetch', walletController.fetchAllWallets);
-router.post('/wallets/create', walletController.createWallet);
+router.post('/wallets/create', maxWalletReached, walletController.createWallet);
 router.post('/wallets/delete', walletController.deleteWallet);
 router.post('/wallets/rename', walletController.renameWallet);
 

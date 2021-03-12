@@ -1,25 +1,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors')
-const router = require('./routes');
-const routerSecure = require('./routesSecure');
-const authorize = require('./authorize');
+const router = require('./routes/routes');
+const routerSecure = require('./routes/routesSecure');
+const authorize = require('./middlewares/authorize');
+const corsOptions = require('./middlewares/cors')
 
 const port = process.env.PORT
 const host = process.env.HOST
 
 const app = express();
-
-var whitelist = ['http://localhost:8080', 'http://example2.com']
-var corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
-    }
-  }
-}
 
 app.use(express.urlencoded({extended:true}));
 app.use(bodyParser.json({limit:"1.1MB"}));

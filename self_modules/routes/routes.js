@@ -1,9 +1,9 @@
 let express = require('express');
 let router = express.Router();
-const toolbox = require("./toolbox");
+const toolbox = require("../toolbox");
 
-let userController = require('../controllers/userController');
-let assetController = require('../controllers/assetController');
+let userController = require('../../controllers/userController');
+let assetController = require('../../controllers/assetController');
 
 // Routes Users
 router.post('/user/connect', userController.connectUser);

@@ -8,8 +8,7 @@ exports.fetchAllAssets = (req, res) => {
         if (error) {
             res.status(500).send(error)
             return;
-        }
-        else {
+        } else {
             resultSQL.forEach(r => {
                 delete r.id
             });
@@ -21,13 +20,11 @@ exports.fetchAllAssets = (req, res) => {
 
 
 exports.fetchWalletAllAssets = (req, res) => {
-    console.log([req.params.id_wallet, req.body.user_id])
     db.db.query("SELECT DISTINCT a.ticker, a.label, aw.id, aw.quantity, aw.invested_amount, aw.price_alert, w.type FROM assets AS a, wallets AS w, assets_wallets AS aw WHERE aw.id_wallet = ? AND aw.id_asset = a.id AND w.user_id = ? AND w.id = aw.id_wallet;", [req.params.id_wallet, req.body.user_id], (error, resultSQL) => {
         if (error) {
             res.status(500).send(error)
             return;
-        }
-        else {
+        } else {
             toolbox.mapping_label_id_types().then(mapping => {
                 if (mapping[resultSQL[0].type] === "Crypto-actifs") {
                     toolbox.cyptoValuesCall().then(cryptoAPI => {
@@ -61,8 +58,7 @@ exports.addAsset = (req, res) => {
         if (error) {
             res.status(500).send(error)
             return;
-        }
-        else {
+        } else {
             res.status(201).send("Ajout effectué")
             return;
         }
@@ -74,8 +70,7 @@ exports.removeAsset = (req, res) => {
         if (error) {
             res.status(500).send(error)
             return;
-        }
-        else {
+        } else {
             res.status(200).send("Suppression effectuée")
             return;
         }
@@ -91,8 +86,7 @@ exports.changeQtyAsset = (req, res) => {
         if (error) {
             res.status(500).send(error)
             return;
-        }
-        else {
+        } else {
             res.status(200).send("Mise à jour effectuée")
             return;
         }
@@ -117,8 +111,7 @@ exports.setPriceAlert = (req, res) => {
                     if (error) {
                         res.status(500).send(error)
                         return;
-                    }
-                    else {
+                    } else {
                         res.status(200).send("Mise à jour effectuée")
                         return;
                     }
@@ -140,8 +133,7 @@ exports.changeInitialInvestment = (req, res) => {
         if (error) {
             res.status(500).send(error)
             return;
-        }
-        else {
+        } else {
             res.status(200).send("Mise à jour effectuée")
             return;
         }
@@ -152,23 +144,3 @@ __fetchTypeAssets = (type) => {
     //permet de récupérer les assets d'un certain type dans le base de données
 }
 
-// PRIVATE ==> Permet de vérifier qu'un portefeuille appartient à l'utilisateur
-__verifyWalletBelonging = (user_id, wallet_id) => {
-    return new Promise((resolve, reject) => {
-        db.db.query("SELECT * FROM wallets WHERE user_id = ? AND id = ?;", [user_id, wallet_id], (error, resultSQL) => {
-            if (error) {
-                reject(500)
-                return;
-            }
-            else {
-                if (!resultSQL.length) {
-                    resolve(false)
-                    return;
-                } else {
-                    resolve(true)
-                    return;
-                }
-            }
-        });
-    });
-}

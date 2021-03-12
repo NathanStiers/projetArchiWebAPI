@@ -35,13 +35,12 @@ exports.createUser = (req, res) => {
                     }
                     res.status(500).send(error);
                     return;
-                }
-                else {
+                } else {
                     user.id = resultSQL.insertId;
                     user.password = null;
                     user.role = "basic";
-                    const token = jwt.sign({ user_id: user.id }, process.env.ACCESS_TOKEN_SECRET);
-                    res.status(201).json({user, token});
+                    const token = jwt.sign({ user_id: user.id, user_role: user.role }, process.env.ACCESS_TOKEN_SECRET);
+                    res.status(201).json({ user, token });
                     return;
                 }
             });
@@ -65,8 +64,8 @@ exports.connectUser = (req, res) => {
                 return;
             } else if (result) {
                 delete resultUser.password
-                const token = jwt.sign({ user_id: resultUser.id }, process.env.ACCESS_TOKEN_SECRET);
-                res.status(200).json({resultUser, token});
+                const token = jwt.sign({ user_id: resultUser.id, user_role: resultUser.role }, process.env.ACCESS_TOKEN_SECRET);
+                res.status(200).json({ resultUser, token });
                 return;
             } else {
                 res.status(401).send("Authentification incorrecte");
@@ -93,20 +92,22 @@ exports.connectUser = (req, res) => {
 exports.upgradeUser = (req, res) => {
     toolbox.mapping_label_id_roles().then(result => {
         mapping_label_id_roles = result
-        db.db.query("UPDATE users SET role = ? WHERE id = ?;", [mapping_label_id_roles['premium'], req.body.user_id], (error, resultSQL) => {
+        console.log(mapping_label_id_roles["premium"])
+        if(req.body.user_role === mapping_label_id_roles["premium"]){
+            res.status(403).send("Vous êtes déjà premium")
+            return;
+        }
+        db.db.query("UPDATE users SET role = ? WHERE id = ?;", [mapping_label_id_roles["premium"], req.body.user_id], (error, resultSQL) => {
             if (error) {
                 res.status(500).send(error);
                 return;
-            }
-            else {
-                res.status(200).send("Vous êtes maintenant un utilisateur premium")
+            } else {
+                let user = new User(req.body.user_id, "premium", null, null, null, null, []);
+                const token = jwt.sign({ user_id: user.id, user_role: user.role }, process.env.ACCESS_TOKEN_SECRET);
+                res.status(200).json({ user, token });
                 return;
             }
-        });
-        return;
-    }).catch(error => {
-        res.status(500).send(error);
-        return;
+        })
     })
 }
 
@@ -130,8 +131,7 @@ exports.forgotPwdUser = (req, res) => {
                 if (error) {
                     res.status(500).send(error);
                     return;
-                }
-                else {
+                } else {
                     toolbox.sendMail(resultUser.mail, "Confidential : Your new password", newPassword).then(result => {
                         res.status(200).send("Email envoyé")
                         return;
@@ -168,8 +168,7 @@ __fetchUserByMail = mail => {
             if (error) {
                 reject(500);
                 return;
-            }
-            else {
+            } else {
                 if (resultSQL.length === 0) {
                     reject(403);
                     return;
@@ -196,8 +195,7 @@ __fetchUserById = id => {
             if (error) {
                 reject(500);
                 return;
-            }
-            else {
+            } else {
                 if (resultSQL.length === 0) {
                     reject(403);
                     return;
