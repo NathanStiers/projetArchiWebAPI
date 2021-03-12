@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const db = require('../self_modules/db');
+const axios = require('axios');
 
 // Permet de vérifier la conformité d'un mail
 exports.checkMail = (mail) => {
@@ -79,9 +80,6 @@ exports.mapping_label_id_roles = () => {
     });
 }
 
-// Permet de supprimer un portefeuille sur base de son id et de son id_user
-// Method : GET 
-// Body : 
 exports.fetchAllTypes = (req, res) => {
     db.db.query("SELECT * FROM types;", (error, resultSQL) => {
         if (error) {
@@ -96,5 +94,27 @@ exports.fetchAllTypes = (req, res) => {
             res.status(200).json(mapping)
             return;
         }
+    });
+}
+
+exports.cyptoValuesCall = () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest", {
+                params: {
+                    'start': '1',
+                    'limit': process.env.COIN_MARKET_CAP_API_LIMIT,
+                    'convert': process.env.COIN_MARKET_CAP_API_CONVERT
+                },
+                headers: { 'X-CMC_PRO_API_KEY': process.env.COIN_MARKET_CAP_API_TOKEN }
+            })
+            .then((response) => {
+                resolve(response.data.data)
+                return;
+            })
+            .catch((error) => {
+                reject(error)
+                return;
+            });
     });
 }

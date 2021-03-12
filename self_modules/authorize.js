@@ -7,6 +7,7 @@ module.exports = (req, res, callback) => {
             return;
         } else {
             req.body.user_id = payload.user_id
+            //Ajouter le rôle
             callback();
             return;
         }

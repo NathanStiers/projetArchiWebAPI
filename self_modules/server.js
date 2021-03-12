@@ -23,7 +23,7 @@ var corsOptions = {
 
 app.use(express.urlencoded({extended:true}));
 app.use(bodyParser.json({limit:"1.1MB"}));
-app.use(cors(corsOptions))
+app.use(cors())
 app.use('/', router);
 app.use(authorize);
 app.use('/', routerSecure);

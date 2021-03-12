@@ -5,6 +5,8 @@ let userController = require('../controllers/userController');
 let walletController = require('../controllers/walletController');
 let assetController = require('../controllers/assetController');
 
+const isBelongingWallet = require('./isBelongingWallet')
+
 // Routes Users
 router.post('/user/premium', userController.upgradeUser);
 
@@ -16,10 +18,10 @@ router.post('/wallets/rename', walletController.renameWallet);
 
 // Routes Assets
 router.post('/assets/:id_wallet/fetch', assetController.fetchWalletAllAssets);
-router.post('/assets/add', assetController.addAsset);
-router.post('/assets/remove', assetController.removeAsset);
-router.post('/assets/changeQty', assetController.changeQtyAsset);
-router.post('/assets/alert', assetController.setPriceAlert);
-router.post('/assets/changeInvestment', assetController.changeInitialInvestment);
+router.post('/assets/add', isBelongingWallet, assetController.addAsset);
+router.post('/assets/remove', isBelongingWallet, assetController.removeAsset);
+router.post('/assets/changeQty', isBelongingWallet, assetController.changeQtyAsset);
+router.post('/assets/alert', isBelongingWallet, assetController.setPriceAlert);
+router.post('/assets/changeInvestment', isBelongingWallet, assetController.changeInitialInvestment);
 
 module.exports = router;
