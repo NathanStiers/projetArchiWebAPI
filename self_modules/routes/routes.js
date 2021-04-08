@@ -15,5 +15,6 @@ router.get('/assets/fetchAll', assetController.fetchAllAssets);
 
 // Routes Misc
 router.get('/misc/fetchAllTypes', toolbox.fetchAllTypes);
+router.get('/misc/fetchAssetsFromType/:id', toolbox.fetchAssetsFromType)
 
 module.exports = router;

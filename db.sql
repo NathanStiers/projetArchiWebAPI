@@ -1,4 +1,5 @@
 -- MySQL Workbench Forward Engineering
+-- LAST UPDATE 22/03/2021
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
@@ -69,12 +70,12 @@ CREATE TABLE IF NOT EXISTS `ProjetArchiWeb`.`Wallets` (
   CONSTRAINT `type_w`
     FOREIGN KEY (`type`)
     REFERENCES `ProjetArchiWeb`.`Types` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `user_id_w`
     FOREIGN KEY (`user_id`)
     REFERENCES `ProjetArchiWeb`.`Users` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -92,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `ProjetArchiWeb`.`Assets` (
   CONSTRAINT `type_a`
     FOREIGN KEY (`type`)
     REFERENCES `ProjetArchiWeb`.`Types` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -109,16 +110,17 @@ CREATE TABLE IF NOT EXISTS `ProjetArchiWeb`.`Assets_wallets` (
   `price_alert` DOUBLE NULL,
   PRIMARY KEY (`id`),
   INDEX `id_wallet_idx` (`id_wallet` ASC) VISIBLE,
+  UNIQUE INDEX `ids_wallet_asset_UNIQUE` (`id_wallet` ASC, `id_asset` ASC) VISIBLE,
   INDEX `id_asset_idx` (`id_asset` ASC) VISIBLE,
   CONSTRAINT `id_wallet`
     FOREIGN KEY (`id_wallet`)
     REFERENCES `ProjetArchiWeb`.`Wallets` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `id_asset`
     FOREIGN KEY (`id_asset`)
     REFERENCES `ProjetArchiWeb`.`Assets` (`id`)
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
@@ -165,26 +167,26 @@ INSERT INTO `ProjetArchiWeb`.`Wallets` (id, type, user_id, label, creation_date)
 -- -----------------------------------------------------
 -- BEL20
 -- -----------------------------------------------------
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (1, 1, 'ACKERMANS V.HAAREN', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (2, 1, 'AEDIFICA', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (3, 1, 'AGEAS NV', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (4, 1, 'ANHEUS-BUSCH INBEV', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (5, 1, 'APERAM', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (6, 1, 'ARGENX SE', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (7, 1, 'BARCO', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (8, 1, 'COFINIMMO SICAFI', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (9, 1, 'COLRUYT', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (10, 1, 'GALAPAGOS', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (11, 1, 'GRP BRUX LAMBERT', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (12, 1, 'ING GROEP', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (13, 1, 'KBC GROUPE', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (14, 1, 'PROXIMUS', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (15, 1, 'SOFINA', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (16, 1, 'SOLVAY', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (17, 1, 'TELENET GROUP HLDG', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (18, 1, 'UCB', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (19, 1, 'UMICORE', 'AAA');
-INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (20, 1, 'WAREHOUSES DE PAUW', 'AAA');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (1, 1, 'ACKERMANS V.HAAREN', 'ACKB');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (2, 1, 'AEDIFICA', 'AED');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (3, 1, 'AGEAS NV', 'AGS');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (4, 1, 'ANHEUS-BUSCH INBEV', 'ABI');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (5, 1, 'APERAM', 'APAM');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (6, 1, 'ARGENX SE', 'ARGX');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (7, 1, 'BARCO', 'BAR');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (8, 1, 'COFINIMMO SICAFI', 'COFB');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (9, 1, 'COLRUYT', 'COLR');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (10, 1, 'GALAPAGOS', 'GLPG');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (11, 1, 'GRP BRUX LAMBERT', 'GBLB');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (12, 1, 'ING GROEP', 'INGA');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (13, 1, 'KBC GROUPE', 'KBC');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (14, 1, 'PROXIMUS', 'PROX');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (15, 1, 'SOFINA', 'SOF');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (16, 1, 'SOLVAY', 'SOLB');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (17, 1, 'TELENET GROUP HLDG', 'TNET');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (18, 1, 'UCB', 'UCB');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (19, 1, 'UMICORE', 'UMI');
+INSERT INTO `ProjetArchiWeb`.`Assets` (id, type, label, ticker) VALUES (20, 1, 'WAREHOUSES DE PAUW', 'WDP');
 -- -----------------------------------------------------
 -- CoinMarketCap TOP 10
 -- -----------------------------------------------------

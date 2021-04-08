@@ -24,11 +24,12 @@ exports.fetchWalletAllAssets = (req, res) => {
         if (error) {
             res.status(500).send(error)
             return;
-        } else {
+        } else if(!resultSQL.length){
+            res.status(200).json(resultSQL)
+        }else {
             toolbox.mapping_label_id_types().then(mapping => {
                 if (mapping[resultSQL[0].type] === "Crypto-actifs") {
                     toolbox.cyptoValuesCall().then(cryptoAPI => {
-                        console.log(cryptoAPI)
                         res.status(200).json({ resultSQL, apiDataCrypto: cryptoAPI })
                         return;
                     }).catch(error => {
@@ -46,16 +47,18 @@ exports.fetchWalletAllAssets = (req, res) => {
                 return;
             })
         }
-    });
+    })
 }
 
 exports.addAsset = (req, res) => {
-    if (req.body.wallet_type !== req.body.asset_type) {
+    /*if (req.body.wallet_type !== req.body.asset_type) {
         res.status(403).send("Le type de l'asset ne correspond pas à celui du portefeuille")
         return;
-    }
-    db.db.query("INSERT INTO assets_wallets (id_wallet, id_asset, quantity, invested_amount) VALUES(?,?,?,?,?);", [req.body.wallet_id, req.body.asset_id, req.body.quantity, req.body.invested_amount], (error, resultSQL) => {
+    }*/
+    db.db.query("INSERT INTO assets_wallets (id_wallet, id_asset, quantity, invested_amount) VALUES(?,?,?,?);", [req.body.wallet_id, req.body.asset_id, req.body.quantity, req.body.invested_amount], (error, resultSQL) => {
         if (error) {
+            console.log(error)
+
             res.status(500).send(error)
             return;
         } else {

@@ -118,3 +118,40 @@ exports.cyptoValuesCall = () => {
             });
     });
 }
+
+exports.fetchAssetsBasedOnType = (id) => {
+    return new Promise((resolve, reject) => {
+        db.db.query("SELECT type FROM wallets WHERE id = ?;", id, (error, resultSQL) => {
+            if (error) {
+                reject(500)
+                return;
+            }
+            else {
+                db.db.query("SELECT * FROM assets WHERE type = ?;", resultSQL[0].type, (error, resultSQL) => {
+                    if (error) {
+                        reject(500)
+                        return;
+                    }
+                    else {
+                        let assets = []
+                        resultSQL.forEach(r => {
+                            assets.push(r);
+                        });
+                        resolve({assets, type : resultSQL[0].type})
+                        return;
+                    }
+                });
+            }
+        });
+    });
+}
+
+exports.fetchAssetsFromType = (req, res) => {
+    this.fetchAssetsBasedOnType(req.params.id).then(result => {
+        res.status(200).json(result)
+        return;
+    }).catch(error => {
+        res.status(500).send(error)
+        return;
+    })
+}
