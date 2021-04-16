@@ -15,10 +15,6 @@ const saltRounds = 12;
  * @param {Object} res The response Object
  */
 exports.createUser = (req, res) => {
-    if (req.body.password !== req.body.passwordConfirm) {
-        res.status(400).send('Passwords do not match');
-        return;
-    }
     if(req.body.name === "" || req.body.surname === "" || req.body.mail === "" || req.body.password === ""){
         res.status(400).send('Please fill in all fields of the form');
         return;
@@ -47,10 +43,7 @@ exports.createUser = (req, res) => {
                 user.password = null;
                 user.role = "basic";
                 const token = jwt.sign({ user_id: user.id, user_role: user.role }, process.env.ACCESS_TOKEN_SECRET);
-                let d = new Date();
-                let expires = d.setTime(d.getTime() + 6 * 60 * 60 * 1000);
-                res.cookie('Token', token, { maxAge: expires });
-                res.status(201).send('Account created')
+                res.status(201).json(token)
             }
         });
     })
@@ -93,10 +86,7 @@ exports.upgradeUser = (req, res) => {
             res.status(500).send(error + '. Please contact the webmaster')
         } else {
             const token = jwt.sign({ user_id: req.body.user_id, user_role: "premium" }, process.env.ACCESS_TOKEN_SECRET);
-            let d = new Date();
-            let expires = d.setTime(d.getTime() + 6 * 60 * 60 * 1000);
-            res.cookie('Token', token, { maxAge: expires });
-            res.status(500).send('You are now a premium user');
+            res.status(200).json(token);
         }
     })
 }

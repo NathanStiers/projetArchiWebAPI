@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
  * @param {Function} callback The next function
  */
 module.exports = (req, res, callback) => {
-    jwt.verify(req.cookies.Token, process.env.ACCESS_TOKEN_SECRET, (error, payload) => {
+    jwt.verify(req.headers.token, process.env.ACCESS_TOKEN_SECRET, (error, payload) => {
         if (error) {
             res.status(500).send(error + '. Please contact the webmaster')
         } else {

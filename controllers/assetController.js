@@ -15,8 +15,8 @@ exports.fetchWalletAllAssets = (req, res) => {
                 return;
             } else {
                 let mapping_types = req.body.mapping_types
+                let newDict = {}
                 if ((mapping_types[assetsFromType.type]) === "Crypto-assets") {
-                    let newDict = {}
                     toolbox.cryptoValuesCall().then(cryptoAPI => {
                         cryptoAPI.forEach(el => {
                             newDict[el.symbol] = {
@@ -29,12 +29,12 @@ exports.fetchWalletAllAssets = (req, res) => {
                                 type: "Crypto-assets"
                             }
                         })
-                        res.status(200).json({ resultSQL, apiInfos: newDict, assetsFromType: assetsFromType.assets, id_wallet: req.params.id_wallet })
+                        res.status(200).json({ resultSQL, apiInfos: newDict, assetsFromType: assetsFromType.assets, type: "Crypto-assets", id_wallet: req.params.id_wallet })
                     }).catch(error => {
                         res.status(500).send(error + '. Please contact the webmaster')
                     })
                 } else if ((mapping_types[assetsFromType.type]) === "Stocks") {
-                    res.status(200).json({ resultSQL, apiInfos: newDict, assetsFromType: assetsFromType.assets, id_wallet: req.params.id_wallet })
+                    res.status(200).json({ resultSQL, apiInfos: newDict, assetsFromType: assetsFromType.assets, type: "Stocks", id_wallet: req.params.id_wallet })
                 } else {
                     res.status(204).send('Only Stocks and crypto-assets are working for the moment')
                 }

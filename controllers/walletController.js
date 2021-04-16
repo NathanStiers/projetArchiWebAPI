@@ -21,7 +21,7 @@ exports.fetchAllWallets = (req, res) => {
                 resultSQL.forEach(w => {
                     user.wallet_list.push(new Wallet(w.id, mapping_types[w.type], w.label, w.creation_date, [], user.id))
                 });
-                res.status(200).json({ user, max_reached: req.body.max_reached, types: result, notification : req.flash().notification })
+                res.status(200).json({ user, max_reached: req.body.max_reached, types: result })
             }).catch(error => {
                 res.status(500).send(error + '. Please contact the webmaster')
             });
@@ -70,7 +70,7 @@ exports.createWallet = (req, res) => {
  * @param {Object} res The response Object
  */
 exports.deleteWallet = (req, res) => {
-    let wallet = new Wallet(req.params.id_wallet, null, null, null, [], req.body.user_id);
+    let wallet = new Wallet(req.body.wallet_id, null, null, null, [], req.body.user_id);
     db.db.query("DELETE FROM wallets WHERE id = ? AND user_id = ?;", [wallet.id, wallet.user_id], (error, resultSQL) => {
         if (error) {
             res.status(500).send(error + '. Please contact the webmaster')

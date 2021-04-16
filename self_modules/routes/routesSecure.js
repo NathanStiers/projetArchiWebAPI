@@ -13,13 +13,16 @@ const mappingTypes = require('../middlewares/mappingTypes')
 const walletConfigurationMiddleware = [maxWalletReached, mappingTypes]
 
 // Routes Users
-router.post('/user/premium', mappingRoles, userController.upgradeUser);
+router.get('/user/premium', mappingRoles, userController.upgradeUser);
 
 // Routes Wallets
+router.get('/wallets/fetch', walletConfigurationMiddleware, walletController.fetchAllWallets);
 router.post('/wallets/create', walletConfigurationMiddleware, walletController.createWallet);
-router.post('/wallets/rename', walletController.renameWallet);
+router.post('/wallets/delete', walletConfigurationMiddleware, walletController.deleteWallet);
+router.post('/wallets/rename', isBelongingWallet, walletController.renameWallet);
  
 // Routes Assets
+router.get('/wallets/:id_wallet', mappingTypes, assetController.fetchWalletAllAssets);
 router.post('/assets/add', isBelongingWallet, assetController.addAsset);
 router.post('/assets/remove', isBelongingWallet, assetController.removeAsset);
 router.post('/assets/changeQty', isBelongingWallet, assetController.changeQtyAsset);
