@@ -8,209 +8,183 @@ const jwt = require('jsonwebtoken');
 
 const saltRounds = 12;
 
-let mapping_label_id_roles = {};
-
-// Permet de créer un nouvel utilisateur s'il n'existe pas déjà
-// Method : POST 
-// Body : name, surname, mail, password
+/**
+ * Allows you to create a new user if it does not already exist
+ * 
+ * @param {Object} req The request Object
+ * @param {Object} res The response Object
+ */
 exports.createUser = (req, res) => {
+    if (req.body.password !== req.body.passwordConfirm) {
+        res.status(400).send('Passwords do not match');
+        return;
+    }
+    if(req.body.name === "" || req.body.surname === "" || req.body.mail === "" || req.body.password === ""){
+        res.status(400).send('Please fill in all fields of the form');
+        return;
+    }
     let user = new User(null, 1, req.body.name, req.body.surname, req.body.mail, null, []);
-    bcrypt.hash(req.body.password, saltRounds, (err, hash) => {
-        if (err) {
-            res.status(500).send(err);
+    bcrypt.hash(req.body.password, saltRounds, (error, hash) => {
+        if (error) {
+            res.status(500).send(error + '. Please contact the webmaster');
             return;
         }
         user.password = hash;
-        if (!toolbox.checkMail(user.mail)) {
-            res.status(400).send("L'adresse mail ne respecte pas le format d'une adresse existante");
+        if (!toolbox.checkMail(user.mail)) { 
+            res.status(400).send('The mail does not correspond to the right format');
             return;
         }
-        toolbox.mapping_label_id_roles().then(result => {
-            mapping_label_id_roles = result
-            db.db.query("INSERT INTO users (role, name, surname, mail, password) VALUES (?, ?, ?, ?, ?);", [mapping_label_id_roles['basic'], user.name, user.surname, user.mail, user.password], (error, resultSQL) => {
-                if (error) {
-                    if (error.errno === 1062) {
-                        res.status(403).send("Cet utilisateur existe déjà")
-                        return;
-                    }
-                    res.status(500).send(error);
-                    return;
-                } else {
-                    user.id = resultSQL.insertId;
-                    user.password = null;
-                    user.role = "basic";
-                    const token = jwt.sign({ user_id: user.id, user_role: user.role }, process.env.ACCESS_TOKEN_SECRET);
-                    res.status(201).json({ user, token });
-                    return;
-                }
-            });
-            return;
-        }).catch(error => {
-            res.status(500).send(error);
-            return;
-        })
-    });
-}
-
-// Permet d'authentifier un utilisateur sur base de son mail et de son mot de passe
-// Method : POST 
-// Body : mail, password
-exports.connectUser = (req, res) => {
-    let user = new User(null, null, null, null, req.body.mail, null, []);
-    __fetchUserByMail(user.mail).then(resultUser => {
-        bcrypt.compare(req.body.password, resultUser.password, function (err, result) {
-            if (err) {
-                res.status(500).send(err);
-                return;
-            } else if (result) {
-                delete resultUser.password
-                const token = jwt.sign({ user_id: resultUser.id, user_role: resultUser.role }, process.env.ACCESS_TOKEN_SECRET);
-                res.status(200).json({ resultUser, token });
-                return;
-            } else {
-                res.status(401).send("Authentification incorrecte");
-                return;
-            }
-        });
-    }).catch(err => {
-        if (err === 400) {
-            res.status(400).send("L'adresse mail indiquée ne respecte pas le format d'une adresse mail correcte");
-            return;
-        } else if (err === 403) {
-            res.status(403).send("Désolé, il n'existe pas d'utilisateur avec l'adresse mail : " + user.mail);
-            return;
-        } else {
-            res.status(500).send(err);
-            return;
-        }
-    })
-}
-
-// Permet de modifier le rôle d'un utilisateur classique vers utilisateur premium sur base de son id
-// Method : GET
-// Body : id (from JWT)
-exports.upgradeUser = (req, res) => {
-    toolbox.mapping_label_id_roles().then(result => {
-        mapping_label_id_roles = result
-        console.log(mapping_label_id_roles["premium"])
-        if(req.body.user_role === mapping_label_id_roles["premium"]){
-            res.status(403).send("Vous êtes déjà premium")
-            return;
-        }
-        db.db.query("UPDATE users SET role = ? WHERE id = ?;", [mapping_label_id_roles["premium"], req.body.user_id], (error, resultSQL) => {
+        let mapping_roles = req.body.mapping_roles
+        db.db.query("INSERT INTO users (role, name, surname, mail, password) VALUES (?, ?, ?, ?, ?);", [mapping_roles['basic'], user.name, user.surname, user.mail, user.password], (error, resultSQL) => {
             if (error) {
-                res.status(500).send(error);
-                return;
+                if (error.errno === 1062) {
+                    res.status(403).send('This mail is already in use');
+                } else {
+                    res.status(500).send(error + '. Please contact the webmaster')
+                }
             } else {
-                let user = new User(req.body.user_id, "premium", null, null, null, null, []);
+                user.id = resultSQL.insertId;
+                user.password = null;
+                user.role = "basic";
                 const token = jwt.sign({ user_id: user.id, user_role: user.role }, process.env.ACCESS_TOKEN_SECRET);
-                res.status(200).json({ user, token });
-                return;
+                let d = new Date();
+                let expires = d.setTime(d.getTime() + 6 * 60 * 60 * 1000);
+                res.cookie('Token', token, { maxAge: expires });
+                res.status(200).send('Account created')
             }
-        })
+        });
     })
 }
 
-// Permet à un utilisateur étourdi de récupérer son mot de passe sur base de son email
-// Method : POST
-// Body : email
-exports.forgotPwdUser = (req, res) => {
-    let user = new User(null, null, null, null, req.body.mail, null, []);
-    __fetchUserByMail(user.mail).then(resultUser => {
-        let newPassword = generator.generate({
-            length: 10,
-            numbers: true
-        });
-        user.id = resultUser.id
-        bcrypt.hash(newPassword, saltRounds, (err, hash) => {
-            if (err) {
-                res.status(500).send(err);
-                return;
-            }
-            db.db.query("UPDATE users SET password = ? WHERE id = ?;", [hash, user.id], (error, resultSQL) => {
-                if (error) {
-                    res.status(500).send(error);
-                    return;
-                } else {
-                    toolbox.sendMail(resultUser.mail, "Confidential : Your new password", newPassword).then(result => {
-                        res.status(200).send("Email envoyé")
-                        return;
-                    }).catch(error => {
-                        res.status(500).send(error);
-                        return;
-                    });
-                }
-            });
-        })
-    }).catch(err => {
-        if (err === 400) {
-            res.status(400).send("L'adresse mail indiquée ne respecte pas le format d'une adresse mail correcte");
-            return;
-        } else if (err === 403) {
-            res.status(403).send("Désolé, il n'existe pas d'utilisateur avec l'adresse mail : " + user.mail);
-            return;
+/**
+ * Allows to authenticate a user based on his email and password
+ * 
+ * @param {Object} req The request Object
+ * @param {Object} res The response Object
+ */
+exports.connectUser = (req, res) => {
+    bcrypt.compare(req.body.password, req.body.user.password, function (error, result) {
+        if (error) {
+            res.status(500).send(error + '. Please contact the webmaster')
+        } else if (result) {
+            delete req.body.user.password
+            const token = jwt.sign({ user_id: req.body.user.id, user_role: req.body.user.role }, process.env.ACCESS_TOKEN_SECRET);
+            let d = new Date();
+            let expires = d.setTime(d.getTime() + 6 * 60 * 60 * 1000);
+            res.cookie('Token', token, { maxAge: expires });
+            res.status(200).send('You are now connected')
         } else {
-            res.status(500).send(err);
-            return;
+            res.status(403).send('Invalid authentication')
+        }
+    });
+}
+
+/**
+ * Allows you to change the role of a classic user to a premium user based on his id
+ * 
+ * @param {Object} req The request Object
+ * @param {Object} res The response Object
+ */
+exports.upgradeUser = (req, res) => {
+    let mapping_roles = req.body.mapping_roles
+    if (req.body.user_role === "premium") {
+        res.status(403).send('You are already a premium user')
+        return;
+    }
+    db.db.query("UPDATE users SET role = ? WHERE id = ?;", [mapping_roles["premium"], req.body.user_id], (error, resultSQL) => {
+        if (error) {
+            res.status(500).send(error + '. Please contact the webmaster')
+        } else {
+            const token = jwt.sign({ user_id: req.body.user_id, user_role: "premium" }, process.env.ACCESS_TOKEN_SECRET);
+            let d = new Date();
+            let expires = d.setTime(d.getTime() + 6 * 60 * 60 * 1000);
+            res.cookie('Token', token, { maxAge: expires });
+            res.status(500).send('You are now a premium user');
         }
     })
-    return;
 }
 
-// PRIVATE ==> Permet de récupérer les informations d'un utilisateur sur base de son mail
-__fetchUserByMail = mail => {
-    return new Promise((resolve, reject) => {
-        if (!toolbox.checkMail(mail)) {
-            reject(400);
+/**
+ * Allows a dizzy user to recover his password based on his email
+ * 
+ * @param {Object} req The request Object
+ * @param {Object} res The response Object
+ */
+exports.forgotPwdUser = (req, res) => {
+    let mail = req.body.user.mail
+    let id = req.body.user.id
+    let newPassword = generator.generate({
+        length: 10,
+        numbers: true
+    });
+    bcrypt.hash(newPassword, saltRounds, (error, hash) => {
+        if (error) {
+            res.status(500).send(error + '. Please contact the webmaster')
             return;
         }
-        db.db.query("SELECT * FROM users WHERE mail = ?;", mail, (error, resultSQL) => {
+        db.db.query("UPDATE users SET password = ? WHERE id = ?;", [hash, id], (error, resultSQL) => {
             if (error) {
-                reject(500);
-                return;
+                res.status(500).send(error + '. Please contact the webmaster')
             } else {
-                if (resultSQL.length === 0) {
-                    reject(403);
-                    return;
-                } else {
-                    toolbox.mapping_label_id_roles().then(result => {
-                        mapping_label_id_roles = result
-                        resultSQL[0].role = mapping_label_id_roles[resultSQL[0].role]
-                        resolve(resultSQL[0]);
-                        return;
-                    }).catch(error => {
-                        reject(error);
-                        return;
-                    })
-                }
+                toolbox.sendMail(mail, "Confidential : Your new password", newPassword).then(result => {
+                    res.status(200).send("Email sent to : " + mail);
+                }).catch(error => {
+                    res.status(500).send(error + '. Please contact the webmaster')
+                });
             }
         });
-    });
+    })
 }
 
-// PACKAGE ==> Permet de récupérer les informations d'un utilisateur sur base de son id
-__fetchUserById = id => {
-    return new Promise((resolve, reject) => {
-        db.db.query("SELECT * FROM users WHERE id = ?;", id, (error, resultSQL) => {
-            if (error) {
-                reject(500);
-                return;
-            } else {
-                if (resultSQL.length === 0) {
-                    reject(403);
-                    return;
-                } else {
-                    toolbox.mapping_label_id_roles().then(result => {
-                        mapping_label_id_roles = result
-                        resultSQL[0].role = mapping_label_id_roles[resultSQL[0].role]
-                        resolve(resultSQL[0]);
-                        return;
-                    }).catch(error => {
-                        reject(error);
-                        return;
-                    })
+/**
+ * Allows a user to analyze their investments through wallet statistics
+ * 
+ * @param {Object} req The request Object
+ * @param {Object} res The response Object
+ */
+exports.statisticsResults = (req, res) => {
+    db.db.query("SELECT DISTINCT a.ticker, a.label, aw.id_wallet, aw.id, aw.quantity, aw.invested_amount, aw.price_alert, w.type FROM assets AS a, wallets AS w, assets_wallets AS aw WHERE aw.id_asset = a.id AND w.user_id = ? AND w.id = aw.id_wallet AND w.id IN (SELECT * FROM(SELECT win.id FROM wallets AS win WHERE win.user_id = ? ORDER BY win.creation_date ASC, win.id ASC LIMIT ?) temp_tab);", [req.body.user_id, req.body.user_id, req.body.user_role === "premium" ? 10 : 3], (error, resultSQL) => {
+        if (error) {
+            res.status(500).send(error + '. Please contact the webmaster')
+        } else {
+            let newDict = {}
+            let mapping_types = req.body.mapping_types
+            toolbox.cryptoValuesCall().then(cryptoAPI => {
+                cryptoAPI.forEach(el => {
+                    newDict[el.symbol] = {
+                        name: el.name,
+                        ticker: el.symbol,
+                        price: el.quote.EUR.price
+                    }
+                })
+                let howMuchType = {
+                    "Crypto-assets": resultSQL.filter(el => mapping_types[el.type] === "Crypto-assets").length,
+                    "Stocks": resultSQL.filter(el => mapping_types[el.type] === "Stocks").length,
+                    "TODO": resultSQL.filter(el => mapping_types[el.type] === "TODO").length
                 }
-            }
-        });
-    });
+                let totalProfit = 0
+                let pruComparison = {
+                    "best": ['error', Number.MAX_VALUE],
+                    "worst": ['error', Number.MIN_VALUE]
+                }
+                let valueComparison = {
+                    "best": ['error', Number.MIN_VALUE],
+                    "worst": ['error', Number.MAX_VALUE]
+                }
+                resultSQL.forEach(el => {
+                    if (mapping_types[el.type] === "Crypto-assets") {
+                        totalProfit += (el.quantity * newDict[el.ticker].price) - (el.invested_amount)
+                        pruComparison.worst = (pruComparison.worst[1] < (el.invested_amount / el.quantity)) ? [el.ticker, (el.invested_amount / el.quantity)] : pruComparison.worst
+                        pruComparison.best = (pruComparison.best[1] > (el.invested_amount / el.quantity)) ? [el.ticker, (el.invested_amount / el.quantity)] : pruComparison.best
+                        valueComparison.best = (valueComparison.best[1] < (newDict[el.ticker].price * el.quantity)) ? [el.ticker, (newDict[el.ticker].price * el.quantity)] : valueComparison.best
+                        valueComparison.worst = (valueComparison.worst[1] > (newDict[el.ticker].price * el.quantity)) ? [el.ticker, (newDict[el.ticker].price * el.quantity)] : valueComparison.worst
+                    }
+                })
+                let countUniqueAssets = new Set(resultSQL.map(({ ticker }) => ticker)).size
+                res.status(200).json({ howMuchType, countUniqueAssets, totalProfit, pruComparison, valueComparison })
+            }).catch(error => {
+                res.status(500).send(error + '. Please contact the webmaster')
+            })
+        }
+    })
 }

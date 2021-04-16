@@ -5,6 +5,11 @@ const dbUser = process.env.DB_USER
 const dbPwd = process.env.DB_PWD
 const dbName = process.env.DB_NAME
 
+/**
+ * Connect the server with the database
+ * 
+ * @returns {Promise} Connect the DB and return a promise
+ */
 let connect = ()=>{
     return new Promise((resolve, reject) => {
         let dbClient = mysql.createConnection({
@@ -14,11 +19,11 @@ let connect = ()=>{
             database: dbName
         })
 
-        dbClient.connect((err)=>{
-            if(err){
-                console.log("[Db] Unable to connect to server: " + err);
-                reject(err)
-            }else{
+        dbClient.connect((error)=>{
+            if(error){
+                console.info("[Db] Unable to connect to server: " + error);
+                reject(error)
+            } else {
                 console.info("[Db] Connected successfully to server")
                 exports.db = dbClient
                 resolve(exports.db)

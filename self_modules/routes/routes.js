@@ -1,20 +1,16 @@
 let express = require('express');
 let router = express.Router();
-const toolbox = require("../toolbox");
+
+const fetchUserByMail = require('../middlewares/fetchUserByMail')
+const mappingRoles = require('../middlewares/mappingRoles')
 
 let userController = require('../../controllers/userController');
-let assetController = require('../../controllers/assetController');
+
+const userConfigurationMiddleware = [mappingRoles, fetchUserByMail]
 
 // Routes Users
-router.post('/user/connect', userController.connectUser);
-router.post('/user/create', userController.createUser);
-router.post('/user/forgotPwd', userController.forgotPwdUser);
-
-// Routes Assets
-router.get('/assets/fetchAll', assetController.fetchAllAssets);
-
-// Routes Misc
-router.get('/misc/fetchAllTypes', toolbox.fetchAllTypes);
-router.get('/misc/fetchAssetsFromType/:id', toolbox.fetchAssetsFromType)
+router.post('/user/connect', userConfigurationMiddleware, userController.connectUser);
+router.post('/user/create', mappingRoles, userController.createUser);
+router.post('/user/forgotPwd', userConfigurationMiddleware, userController.forgotPwdUser);
 
 module.exports = router;
