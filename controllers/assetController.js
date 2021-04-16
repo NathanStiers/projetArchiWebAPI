@@ -68,7 +68,7 @@ exports.addAsset = (req, res) => {
         if (error) {
             res.status(500).send(error + '. Please contact the webmaster')
         } else {
-            res.status(200).send('Correctly added')
+            res.status(201).send('Correctly added')
         }
     });
 }

@@ -50,7 +50,7 @@ exports.createUser = (req, res) => {
                 let d = new Date();
                 let expires = d.setTime(d.getTime() + 6 * 60 * 60 * 1000);
                 res.cookie('Token', token, { maxAge: expires });
-                res.status(200).send('Account created')
+                res.status(201).send('Account created')
             }
         });
     })
@@ -69,10 +69,7 @@ exports.connectUser = (req, res) => {
         } else if (result) {
             delete req.body.user.password
             const token = jwt.sign({ user_id: req.body.user.id, user_role: req.body.user.role }, process.env.ACCESS_TOKEN_SECRET);
-            let d = new Date();
-            let expires = d.setTime(d.getTime() + 6 * 60 * 60 * 1000);
-            res.cookie('Token', token, { maxAge: expires });
-            res.status(200).send('You are now connected')
+            res.status(200).json(token)
         } else {
             res.status(403).send('Invalid authentication')
         }
