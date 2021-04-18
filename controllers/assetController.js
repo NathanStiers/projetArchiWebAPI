@@ -80,7 +80,7 @@ exports.addAsset = (req, res) => {
  * @param {Object} res The response Object
  */
 exports.removeAsset = (req, res) => {
-    db.db.query("DELETE FROM assets_wallets WHERE id = ?;", [JSON.parse(req.body.assetInfos).id], (error, resultSQL) => {
+    db.db.query("DELETE FROM assets_wallets WHERE id = ?;", [req.body.id], (error, resultSQL) => {
         if (error) {
             res.status(500).send(error + '. Please contact the webmaster')
         } else {
@@ -181,7 +181,6 @@ exports.infoAsset = (req, res) => {
     let api = undefined
     let mapping_types = req.body.mapping_types
     if (req.body.apiInfos != undefined) {
-        console.log("HERE")
         api = JSON.parse(req.body.apiInfos)
         res.status(200).json({ api, asset: JSON.parse(req.body.assetInfos) })
     } else if (mapping_types[JSON.parse(req.body.assetInfos).type] === "Stocks") {

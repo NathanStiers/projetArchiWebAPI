@@ -14,6 +14,7 @@ const walletConfigurationMiddleware = [maxWalletReached, mappingTypes]
 
 // Routes Users
 router.get('/user/premium', mappingRoles, userController.upgradeUser);
+router.get('/statistics', mappingTypes, userController.statisticsResults);
 
 // Routes Wallets
 router.get('/wallets/fetch', walletConfigurationMiddleware, walletController.fetchAllWallets);
