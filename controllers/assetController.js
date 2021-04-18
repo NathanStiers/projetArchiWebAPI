@@ -96,21 +96,15 @@ exports.removeAsset = (req, res) => {
  * @param {Object} res The response Object
  */
 exports.changeQtyAsset = (req, res) => {
-    let assetParsed = JSON.parse(req.body.assetInfos)
-    let api = undefined
-    if (req.body.apiInfos != undefined) {
-        api = JSON.parse(req.body.apiInfos)
-    }
-    if (req.body.quantity === '' || isNaN(req.body.invested_amount) || req.body.quantity <= 0) {
+    if (req.body.quantity === '' || isNaN(req.body.quantity) || req.body.quantity <= 0) {
         res.status(400).send('The quantity is invalid')
         return;
     }
-    db.db.query("UPDATE assets_wallets SET quantity = ? WHERE id = ?;", [req.body.quantity, assetParsed.id], (error, resultSQL) => {
+    db.db.query("UPDATE assets_wallets SET quantity = ? WHERE id = ?;", [req.body.quantity, req.body.id], (error, resultSQL) => {
         if (error) {
             res.status(500).send(error + '. Please contact the webmaster')
         } else {
-            assetParsed.quantity = req.body.quantity
-            res.status(200).json({ api, asset: assetParsed })
+            res.status(200).send('Quantity correctly updated')
         }
     });
 }
@@ -153,20 +147,15 @@ exports.setPriceAlert = (req, res) => {
  * @param {Object} res The response Object
  */
 exports.changeInitialInvestment = (req, res) => {
-    let assetParsed = JSON.parse(req.body.assetInfos)
-    let api = undefined
-    if (req.body.apiInfos != undefined) {
-        api = JSON.parse(req.body.apiInfos)
-    }
     if (req.body.invested_amount === '' || isNaN(req.body.invested_amount) || req.body.invested_amount <= 0) {
         res.status(400).send("The amount is invalid")
         return;
     }
-    db.db.query("UPDATE assets_wallets SET invested_amount = ? WHERE id = ?;", [req.body.invested_amount, assetParsed.id], (error, resultSQL) => {
+    db.db.query("UPDATE assets_wallets SET invested_amount = ? WHERE id = ?;", [req.body.invested_amount, req.body.id], (error, resultSQL) => {
         if (error) {
             res.status(500).send(error + '. Please contact the webmaster')
         } else {
-            res.status(200).send('Update completed')
+            res.status(200).send('Initial amount invested correctly updated')
         }
     })
 }
