@@ -9,5 +9,5 @@
 - A JWT in the header is required for most routes.
 - If you want to test the routes with Postman, you will have to disable the CORS protections.
 
-# documentation API (not up to date)
+# Documentation API (not up to date)
 https://app.swaggerhub.com/apis-docs/NathanStiers/projetArchiWeb/1.0.0-oas3
